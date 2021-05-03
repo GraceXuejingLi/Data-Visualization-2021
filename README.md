@@ -19,7 +19,7 @@ Please see the codes and more visulization findings in the folder.
 
 <img width="615" alt="Screen Shot 2021-05-03 at 3 13 40 PM" src="https://user-images.githubusercontent.com/71298423/116921605-33089c80-ac22-11eb-8751-c8d4268e2c04.png">
 
-### [Project 2: Parking Violation by precincts in NYC]()
+### [Project 2: Parking Violation by precincts in NYC](https://github.com/GraceXuejingLi/Data-Visualization-2021/tree/main/Project2_Mapping)
 	├── Rmd
 	├── html  
 	├── pdf 
