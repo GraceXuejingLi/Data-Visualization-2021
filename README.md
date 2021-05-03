@@ -7,9 +7,11 @@
 	├── Rmd
 	├── html  
 	├── pdf 
+
+#### Description:
 This visuliazation includes static and interavtive graphs that highlight some important patterns of the astronauts' age, sex, nationality, and selection programs.
 
-####Sample graphs:
+#### Sample graphs:
 
 Please see the codes and more visulization findings in the folder.
 
