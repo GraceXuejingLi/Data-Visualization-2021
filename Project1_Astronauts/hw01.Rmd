@@ -1,0 +1,356 @@
+---
+title: "HW01"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+library("knitr")
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE, message=FALSE, warning = FALSE)
+```
+
+## Load packages
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)    # the king of plotting 
+library(magrittr)   # chain operators, e.g. to "pipe" a value forward
+library(dplyr)      # for data manipulation 
+#install.packages("viridis", dependencies = TRUE)
+library(ggthemes)
+library(viridis)
+library(plotly)
+#install.packages("ggridges",dependencies =TRUE)
+library(ggridges)
+library(packcircles)
+library(tidyverse)
+#install.packages("htmlwidgets",dependencies = TRUE)
+#install.packages("plotly", dependencies = TRUE)
+library(plotly) 
+library(DT)
+```
+
+
+## Data
+
+We will be using the _Astronaut database_ (Stavnichuk & Corlett 2020) that contains publicly available information about all astronauts who participated in space missions before January 15, 2020. The provided information includes the full astronaut name, sex, date of birth, nationality, military status, a title and year of a selection program, and information about each mission completed by a particular astronaut such as a year, ascend and descend shuttle names, mission and extravehicular activity (EVAs) durations.
+
+The following variables are included:
+
+# `astronauts.csv`
+
+| variable                 | class     | description                                               |
+| :----------------------- | :-------- | --------------------------------------------------------- |
+| id                       | double    | ID                                                        |
+| number                   | double    | Number                                                    |
+| nationwide_number        | double    | Number within country                                     |
+| name                     | character | Full  name                                                |
+| original_name            | character | Name in original language                                 |
+| sex                      | character | Sex                                                       |
+| year_of_birth            | double    | Year of birth                                             |
+| nationality              | character | Nationality                                               |
+| military_civilian        | character | Military status                                           |
+| selection                | character | Name of selection program                                 |
+| year_of_selection        | double    | Year of selection program                                 |
+| mission_number           | double    | Mission number                                            |
+| total_number_of_missions | double    | Total number of missions                                  |
+| occupation               | character | Occupation                                                |
+| year_of_mission          | double    | Mission year                                              |
+| mission_title            | character | Mission title                                             |
+| ascend_shuttle           | character | Name of ascent shuttle                                    |
+| in_orbit                 | character | Name of spacecraft used in orbit                          |
+| descend_shuttle          | character | Name of descent shuttle                                   |
+| hours_mission            | double    | Duration of mission in hours                              |
+| total_hrs_sum            | double    | Total duration of all missions in hours                   |
+| eva_instances            | double    | Instances of EVA by mission                               |
+| eva_hrs_mission          | double    | Duration of extravehicular activities during the mission  |
+| total_eva_hrs            | double    | Total duration of all extravehicular activities in hours  |
+
+### Load Data from csv file
+```{r, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+astronauts <- read.csv("astronauts.csv")
+```
+
+### Let's check the data
+
+```{r}
+head(astronauts)
+str(astronauts)
+```
+
+### 1. Age & Sex
+
+Visualize the information presented by the year of birth of astronauts. This could be their age when selected, their age during their first mission, or how old they were during their last mission (or all of these). This could also include who were the youngest or oldest astronauts, or which astronauts where active the longest. In addition, use the sex information on the astronauts for further differentiation.
+
+Create 2-3 charts in this section to highlight some important patterns. Make sure to use some variation in the type of visualizations. Briefly discuss which visualization you recommend to your editor and why.
+
+Discuss three specific design choices in these graphs that were influenced by your knowledge of the data visualization principles we discussed in the lectures.
+
+#### Graph 1: Frequency of age selected.  
+
+```{r, eval= TRUE, echo=TRUE}
+astronauts %>% 
+  mutate(age = year_of_selection - year_of_birth) %>% 
+  group_by(age,sex) %>% 
+  summarize(Total = n()) %>% 
+  ungroup() %>% 
+  ggplot(aes(age,Total)) +
+  geom_line(aes(color=sex))+
+  theme_minimal()+
+  labs(title="Frequency of Age Selected",x="Age",caption = "Astronaut Database (Stavnichuk & Corlett 2020)")
+
+```
+
+#### Graph 2: Astronauts ranked by top 5 active the longest years
+```{r, eval= TRUE, echo=TRUE}
+Top5 <- astronauts %>% 
+  group_by(name) %>% 
+  mutate(Duration = max(year_of_mission) - min(year_of_mission)) %>% 
+  select(name, Duration) %>% 
+  arrange(desc(Duration)) %>% 
+  distinct() %>% 
+  ungroup(name) %>% 
+  mutate(rank = dense_rank(desc(Duration))) %>%
+  filter(rank <= 5) %>%
+  group_by(rank)
+
+ggplot(Top5,aes(x=reorder(name, Duration),Duration,fill=Duration))+
+  geom_bar(stat="identity",width=0.6,alpha=0.85)+
+  coord_flip() +
+  scale_fill_gradient(low="darkslategray3",high = "navy")  +
+  theme_minimal()+
+  labs(title="Most Active Astronauts Ranked by Years",x="Name", y= "Years",caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")
+
+```
+    
+    
+    The graphs above follow the general visualization principles of graphs being truthful, functional, and insightful. Moreover, the first graph shows comparisons of the age the astronauts were selected by gender, coded in two contrasting colors. Such design choices give the reader a strong and instant impression of the distinctive contrast between how many male and female astronauts were selected at each age group. The second graph is also simple and straightforward. It shows which astronauts were active the longest and ranked the top ten active longest astronauts by descending order. Both graphs follow a consistent theme with the data points occupying a majority of the graph. Not only are they visually pleasing, but the messages were also conveyed in the most direct way possible.  
+
+### 2. Nationality
+
+For a long time, space exploration was a duel between two superpowers. But recently, other nations have entered the game as well. Use the information on the nationality of the astronauts to visualize some interesting patterns. Consider, for example, that the composition of shuttle missions has recently become mixed nationalities, something that was absent in earlier times. 
+
+Create 1-2 charts in this section to highlight the information on nationality. Make sure to use some variation in the type of visualizations. Briefly discuss which visualization you recommend to your editor and why.
+
+#### Graph 1: Change in Space Power over Time
+
+```{r, eval= TRUE, echo=TRUE}
+SpacePower <- astronauts %>% 
+  group_by(nationality, year_of_selection) %>% 
+  summarize(n.astronauts = n()) %>% 
+  ungroup() %>% 
+  ggplot(aes(year_of_selection, n.astronauts, size = n.astronauts, fill= nationality)) +
+  geom_point(alpha=0.7, shape=21, color="black") +
+  scale_size(range = c(.1, 15), name="N.Astronauts")+
+  scale_fill_viridis(discrete=TRUE, guide=FALSE, direction = -1, option="inferno") +
+  theme_minimal()+
+  scale_x_continuous("Year", breaks = seq(1950, 2020, by = 10))+
+  labs(title="Change in Space Power Over Time", y="Number of Astronauts", caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")
+
+#turn ggplot interactive with ploty
+SPower <- ggplotly(SpacePower)
+SPower
+```
+    
+    The graph above gives a wholistic view of the change in space power of all nations over time, and it also allows the reader to interact with the graph to filter for information as needed. For example, we could see at what point did Germany or other European countries start to catch up with the main space power players. Alternatively, we could see that Japan gained tremendous space power in the 80s but fell behind in the beginning of the century, whereas China didn't join the game until 2000 and quickly became one of the main space power players alongside the US, Japan, and Russia. 
+  
+### 3. Space walks
+Space walks, or extravehicular activities, are often the highlight of these missions. Wrangle the data to  create an overview of cumulative spacewalk records of individual astronauts (i.e. calculate the number and total duration of EVA by astronaut).
+
+Create 1-2 charts in this section to highlight some important patterns. Make sure to use some variation in the type of visualizations. Briefly discuss which visualization you recommend to your editor and why.
+
+#### Graph1: Correlation between EVA numbers and EVA hours
+
+```{r, eval= TRUE, echo=TRUE}
+astronauts %>% 
+  group_by(name) %>% 
+  summarize(N.Eva = sum(eva_instances), Eva.hours = sum(eva_hrs_mission)) %>% 
+  distinct() %>% 
+  top_n(10, Eva.hours) %>% 
+  arrange(desc(Eva.hours)) %>%
+  ungroup() %>% 
+  ggplot(aes(x=reorder(name,Eva.hours), Eva.hours)) +
+  geom_bar(stat="identity", size=.1, alpha=.8, width=0.6, fill ="coral3") + 
+  coord_flip()+
+  theme(legend.position="none")+
+  theme_minimal()+
+  labs(title="Astronauts with longest EVA hours", x= NULL, y="Total EVA Hours", caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")
+
+```
+
+#### Graph 2: Total EVA Hours by country over the past two decades
+
+```{r, eval= TRUE, echo=TRUE}
+astronauts %>% 
+  group_by(nationality,year_of_mission) %>% 
+  summarize(Eva.hours = sum(total_eva_hrs)) %>% 
+  distinct() %>% 
+  arrange(year_of_mission,desc(Eva.hours)) %>%
+  filter(year_of_mission %in% seq(2000, 2018, by = 2)) %>%
+  ungroup() %>% 
+  ggplot(aes(year_of_mission,nationality,size = Eva.hours, fill = nationality)) +
+  geom_density_ridges(alpha=0.9, bins=10, aes(col = nationality)) +
+  theme_ridges() + 
+  scale_fill_brewer(palette="RdBu")+
+  theme_minimal()+
+  theme(legend.position = "none", 
+        panel.spacing = unit(0.1, "lines"))+
+  labs(title="Total EVA Hours by country over the past two decades", y=NULL, x= NULL, caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")
+ 
+```
+    
+    The first graph is a bar graph that shows a list of astronauts with the longest overall extravehicular activities and their corresponding total EVA hours. The second graph shows the total EVA hours of all countries over the past two decades. Depends on the topic of the article, the second graph is richer in content because the differences in total EVA hours overtime are positioned vertically. The contrasts between different countries are clearly visible to the reader. And if we zoom in, we could also see during which year the country's EVA activities peaked. Therefore, I would recommend the second graph because of its versatility to support all kinds of analysis.
+  
+### 4. Your turn to choose
+
+There are few other variables that could make for an interesting story, for example military / civilian status, occupation, shuttle names, mission titles, length in orbit or average length of EVA activities (considering we now have permanent space stations) etc. Select some of these variables to tell a story of your selection.
+
+Create 2-3 charts in this section to highlight some important patterns. Make sure to use some variation in the type of visualizations. Briefly discuss which visualization you recommend to your editor and why.
+
+#### Graph 1: Countries with the highest female/male astronauts proportion? or female astronauts?
+```{r, eval= TRUE, echo=TRUE}
+astronauts %>% 
+  group_by(nationality, sex) %>% 
+  summarize(counts = n()) %>% 
+  top_n(10,counts) %>% 
+  arrange(desc(counts)) %>%
+  filter(nationality %in% c("U.S.", "U.S.S.R/Russia", "Canada", "Japan", "France", "China", "Italy", "Korea", "U.K.")) %>% 
+  ungroup() %>%  
+  ggplot(aes(x=reorder(nationality, counts, na.rm=TRUE), counts, fill = sex)) +
+  geom_bar(stat = 'identity',width=0.7,alpha=0.85) +
+  coord_flip() +
+  theme(text = element_text(size=16)) +
+  scale_color_manual(values = c("darkcyan", "coral3"))+
+  theme_minimal()+
+  labs(title="Countries with female astronauts", y="Number of Astronauts", x= NULL, caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")
+
+```
+
+#### Graph 2: military / civilian status
+
+```{r, eval= TRUE, echo=TRUE}
+astronauts %>% 
+  group_by(year_of_mission, military_civilian) %>% 
+  summarize(counts = n()) %>% 
+  ungroup() %>% 
+  ggplot(aes(year_of_mission,counts, col = military_civilian)) +
+  geom_point()+
+  geom_smooth(lwd=2, se=FALSE)+
+  scale_color_manual(values = c("cadetblue3", "coral2"))+
+  theme_minimal()+
+  labs(title="Military vs. Civilian", y="Number of Missions", x= NULL, caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")
+
+```
+
+#### Graph 3: Selection Program
+
+```{r, eval= TRUE, echo=TRUE}
+Program <- astronauts %>% 
+  group_by(selection) %>% 
+  summarize(counts = n()) %>% 
+  arrange(desc(counts)) %>% 
+  top_n(10,counts) %>% 
+  ungroup() 
+
+# Generate the layout. This function return a dataframe with one line per bubble. 
+# It gives its center (x and y) and its radius, proportional of the value
+packing <- circleProgressiveLayout(Program$counts, sizetype='area')
+
+#add the centers and radii to the sample data
+Program <- add_column(Program, packing)
+
+# Provides more points for ggplot to draw the perimeters of the circles
+dat.gg<-circleLayoutVertices(packing, npoints=50)
+
+ggplot() + 
+  geom_polygon(data = dat.gg, aes(x, y, group = id, fill=as.factor(id)),  alpha = 0.8) +
+  scale_fill_brewer(palette="RdBu") +
+  geom_text(data = Program, 
+            aes(x = x, y = y, 
+                size = counts, # vary the size of the text based on relative magnitude of the variable of interest
+                label = selection), show.legend = FALSE)+
+  labs(title = "Most Popular Selection Programs",caption = "Source: Astronaut Database (Stavnichuk & Corlett 2020)")+
+  theme(legend.position = "none")+
+  theme_void()+
+  guides(alpha = FALSE)+
+  coord_equal() ### makes your plot square
+
+```
+    
+    
+    The first graph displays a list of countries and their total number of astronauts with a distinction in gender. The list is sorted in descending order. Therefore, it's clear to the reader which country has the most number of female astronauts. However, the stark contrast between US and other countries makes the graph not super rich in terms of information. 
+    The second graph investigates the differences between number of military and civilian missions over the year, and the two lines summarize the trend of how both types have changed over the year. The last graph showcases the top 10 most popular selection programs with the size of the text designed to match the magnitude of each program. This graph has distinctive visual features that might interest the reader to investigate more into the informations on different selection programs.  
+
+### Interactivity
+
+### 5. Make two plots interactive
+
+Choose 2 of the plots you created above and add interactivity. For at least one of these interactive plots, this should not be done through the use of `ggplotly`. Briefly describe to the editor why interactivity in these visualizations is particularly helpful for a reader.
+
+#### Graph 1:
+```{r, eval= TRUE, echo=TRUE}
+Sex <- astronauts %>% 
+  mutate(age = year_of_selection - year_of_birth) %>% 
+  group_by(age,sex) %>% 
+  summarize(Total = n()) %>% 
+  ungroup() %>% 
+  plot_ly(x= ~age, y= ~Total,type = 'scatter',mode='lines',color= ~sex) %>% 
+  layout(title="Age Selected by Gender",
+         margin = list( autoexpand = TRUE, t = 80, b = 120),
+         annotations =   list(x = 1, y = - 0.3, 
+                text = "<i>Source: Astronaut Database (Stavnichuk & Corlett 2020)</i>", 
+                showarrow = F, xref='paper', yref='paper', 
+                xanchor='right', yanchor='auto', xshift=0, yshift=0,
+                font=list(size=12)))
+Sex
+```
+
+#### Graph 2: Military VS. Civilian type
+
+```{r, eval= TRUE, echo=TRUE}
+astronauts %>% 
+  group_by(year_of_mission, military_civilian) %>% 
+  summarize(counts = n()) %>% 
+  ungroup() %>% 
+  plot_ly(x= ~ year_of_mission, y= ~ counts, color= ~military_civilian) %>% 
+  add_markers(showlegend=FALSE) %>% 
+  add_lines(y = ~fitted(loess(counts ~ year_of_mission)),
+            line = list(color = 'rgba(7, 164, 181, 1)')) %>% 
+  layout(title="Military VS. Civilian ",
+         margin = list( autoexpand = TRUE, t = 80, b = 120),
+         annotations =   list(x = 1, y = - 0.3, 
+                text = "<i>Source: Astronaut Database (Stavnichuk & Corlett 2020)</i>", 
+                showarrow = F, xref='paper', yref='paper', 
+                xanchor='right', yanchor='auto', xshift=0, yshift=0,
+                font=list(size=12)))
+```
+     
+     
+     The first plot is made interactive so that the reader could get the exact number of astronauts selected at a given age and compare it across gender. In the second interactive plot, the reader is able to investigate the counts of military or civilian missions each year. The line in the graph showcases the generl trend of how the total number of missions has declined over the year. 
+
+### 6. Data Table
+
+To allow the reader to explore the record holding achievements of astronauts, aggregate the data by astronaut. Include the total number of missions, the total mission time, and anything else you consider useful to share and add a datatable to the output. Make sure the columns are clearly labeled. Select the appropriate options for the data table (e.g. search bar, sorting, column filters, in-line visualizations etc.). Suggest to the editor which kind of information you would like to provide in a data table and why.
+```{r, eval= TRUE, echo=TRUE}
+table <- astronauts %>% 
+  group_by(name,nationality) %>% 
+  select(sex,nationality, total_number_of_missions, total_hrs_sum, eva_instances, eva_hrs_mission, total_eva_hrs) %>% 
+  arrange(desc(total_hrs_sum)) %>% 
+  distinct() %>% 
+  ungroup()
+
+datatable(table)
+```
+     
+     
+     The information selected for the table include the basic information of the astronauts, their total number of missions, the total duration of all missions in hour，EVA instances in each mission, the total EVA hours in each mission, and finally the total EVA hours for each astronauts. If the reader is interested in learning the EVA information of a specific astronauts, they could type the astronaut's name in the search bar and filter for all rows with that astronaut's information.
+
+## Technical Details
+
+The data comes in a reasonably clean file. However, if you do find issues with the data, recode any values, etc. please make this clear in the code (and if significant add into the description).
+
+If needed for your visualization, you can add visual drapery like flag icons, space images etc. but you are certainly not obligated to do that. What is important, however, to *use a consistent style across all your visualizations*. 
+
+Part of the task will be transforming the dataset into a shape that allows you to plot what you want in     `ggplot2`. For some plots, you will necessarily need to be selective in what to include and what to leave out. 
+
+Make sure to use _at least_ three different types of graphs, e.g. line graphs, scatter, histograms, bar charts, dot plots, heat maps, etc.
