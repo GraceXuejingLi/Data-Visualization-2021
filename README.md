@@ -41,7 +41,7 @@ Please see the codes and more visulization findings in the folder.
 <img width="697" alt="Screen Shot 2021-05-03 at 3 18 42 PM" src="https://user-images.githubusercontent.com/71298423/116922143-ee313580-ac22-11eb-95cc-7d5744b08895.png">
 
 
-### [Project 3: Text Mining Kickstarter Projects]()
+### [Project 3: Text Mining Kickstarter Projects](https://github.com/GraceXuejingLi/Data-Visualization-2021/tree/main/Project3_Text_Analysis)
 	├── Rmd
 	├── html  
 	├── pdf 
