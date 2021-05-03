@@ -14,6 +14,8 @@ This visuliazation includes static and interavtive graphs that highlight some im
 #### Sample graphs:
 
 Please see the codes and more visulization findings in the folder.
+<img width="360" alt="Screen Shot 2021-05-03 at 3 11 29 PM" src="https://user-images.githubusercontent.com/71298423/116921434-f9d02c80-ac21-11eb-9b73-f0603fd7b755.png">
+<img width="345" alt="Screen Shot 2021-05-03 at 3 11 42 PM" src="https://user-images.githubusercontent.com/71298423/116921442-fc328680-ac21-11eb-84bb-2456c1df638c.png">
 
 ### [Project 2]()
 	├── Rmd
