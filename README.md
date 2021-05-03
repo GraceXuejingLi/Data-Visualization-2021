@@ -60,7 +60,7 @@ Please see the codes and more visulization findings in the folder.
 
 <img width="485" alt="Screen Shot 2021-05-03 at 3 31 21 PM" src="https://user-images.githubusercontent.com/71298423/116923504-b5925b80-ac24-11eb-8e5e-20a3ac8a5b66.png">
 
-### [Project 4: Network Analysis of U.S. Senate Tweets]()
+### [Project 4: Network Analysis of U.S. Senate Tweets](https://github.com/GraceXuejingLi/Data-Visualization-2021/tree/main/Project4_Twitter_Network)
 	├── Rmd
 	├── html  
 	├── pdf 
