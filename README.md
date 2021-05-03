@@ -3,7 +3,7 @@ Created and Updated by Grace Xuejing Li
 
 ## Repo Map, Descriptions, Sample graphs
 
-### [Project 1: Astronauts]()
+### [Project 1: Astronauts](https://github.com/GraceXuejingLi/Data-Visualization-2021/tree/main/Project1_Astronauts)
 	├── Rmd
 	├── html  
 	├── pdf 
