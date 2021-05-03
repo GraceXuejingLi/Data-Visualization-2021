@@ -15,9 +15,9 @@ This visuliazation includes static and interavtive graphs that highlight some im
 
 Please see the codes and more visulization findings in the folder.
 
-<img width="360" alt="Screen Shot 2021-05-03 at 3 11 29 PM" src="https://user-images.githubusercontent.com/71298423/116921434-f9d02c80-ac21-11eb-9b73-f0603fd7b755.png">
+<img width="710" alt="Screen Shot 2021-05-03 at 3 13 31 PM" src="https://user-images.githubusercontent.com/71298423/116921596-313ed900-ac22-11eb-82fb-25188defdedf.png">
 
-<img width="345" alt="Screen Shot 2021-05-03 at 3 11 42 PM" src="https://user-images.githubusercontent.com/71298423/116921442-fc328680-ac21-11eb-84bb-2456c1df638c.png">
+<img width="615" alt="Screen Shot 2021-05-03 at 3 13 40 PM" src="https://user-images.githubusercontent.com/71298423/116921605-33089c80-ac22-11eb-8751-c8d4268e2c04.png">
 
 ### [Project 2]()
 	├── Rmd
